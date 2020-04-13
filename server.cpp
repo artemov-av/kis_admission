@@ -2,8 +2,7 @@
 
 const int GameServer::MAX_CNT_EVENTS = 10000;
 
-GameServer::GameServer(uint16_t port) : port_(port) {
-  word_pool_.ReadWordsFromFile("../words.txt");
+GameServer::GameServer(uint16_t port, const WordPool& word_pool) : port_(port), word_pool_(word_pool) {
   listener_fd_ = PrepareListener();
   listen(listener_fd_, SOMAXCONN);
   epoll_fd_ = epoll_create1(0);
@@ -84,12 +83,14 @@ int GameServer::AcceptClient() {
   MakeFdNonblock(new_client_fd);
   AddFdInEpoll(new_client_fd);
 
-  client_map_.insert(std::make_pair(new_client_fd, Game("test")));
+  auto new_word = word_pool_.GetRandomWord();
+  client_map_.insert(std::make_pair(new_client_fd, Game(new_word)));
   return new_client_fd;
 }
 
 void GameServer::ShutdownClient(int client_fd) {
   client_map_.erase(client_fd);
+  epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, client_fd, NULL);
   shutdown(client_fd, SHUT_RDWR);
   close(client_fd);
 }

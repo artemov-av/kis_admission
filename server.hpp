@@ -19,7 +19,7 @@
 
 class GameServer {
 public:
-  explicit GameServer(uint16_t port);
+  explicit GameServer(uint16_t port, const WordPool& word_pool);
   void ServeForever();
 
 private:

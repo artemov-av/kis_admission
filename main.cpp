@@ -2,7 +2,9 @@
 #include <cstdlib>
 
 int main(int argc, char *argv[]) {
-  GameServer server(atoi(argv[1]));
+  WordPool word_pool;
+  word_pool.ReadWordsFromFile("../words.txt");
+  GameServer server(atoi(argv[1]), word_pool);
   server.ServeForever();
   return 0;
 }
